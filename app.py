@@ -23,6 +23,7 @@ def login():
     else:
         return render_template("login.html")
 
+
 @app.route("/welcome")
 def welcome():
     if ("user" in session):
@@ -36,7 +37,7 @@ def handlesignup():
         username = request.form.get("uname")
         password = request.form.get("pass1")
         cpassword = request.form.get("pass2")
-
+        email = request.form.get("email")
         cursor.execute("SELECT * FROM users WHERE username=%s", [username])
         user = cursor.fetchall()
 
@@ -60,7 +61,7 @@ def handlesignup():
             return redirect("/")
         else:
             hashed_pass = generate_password_hash(password, method='sha256')
-            cursor.execute("INSERT INTO users (username, password, timestamp) VALUES (%s, %s, %s)", (username, hashed_pass, datetime.now()))
+            cursor.execute("INSERT INTO users (username, password, timestamp, email) VALUES (%s, %s, %s, %s)", (username, hashed_pass, datetime.now(), email))
             connection.commit()
             flash("Your account has been successfully created", "success")
             return redirect("/login")
@@ -72,10 +73,9 @@ def handlelogin():
     if request.method == "POST":
         username = request.form.get("uname")
         password = request.form.get("password")
-
         cursor.execute("SELECT * FROM users WHERE username=%s", [username])
         user = cursor.fetchone()
-
+        print(user)
         if len(user) > 0:
             # Verify the user's hashed password
             if check_password_hash(user[2], password):
@@ -101,4 +101,4 @@ def handlelogout():
         return redirect("/login")
 
 if __name__ == "__main__":
-    app.run(debug=False, port=8001)
+    app.run(debug=True, port=8001)
